@@ -1,14 +1,6 @@
 #!/bin/bash
 # (ar)ch (pa)ckages - a generic package tasks script for Arch Linux
 
-# Required programs
-req_prgs=(trizen sudo)
-for prog in ${req_prgs[@]}; do
-  if ! hash "$prog" 2>&-; then
-    echo >&2 ""${0##*/}": requires program: "$prog""
-    error=y; fi; done
-[ "$error" = y ] && exit 1
-
 # Parameter existence check
 param_tst () {
   if [ -n "$@" ]; then
