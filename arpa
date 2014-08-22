@@ -1,0 +1,93 @@
+#!/bin/bash
+# (ar)ch (pa)ckages - a generic package tasks script for Arch Linux
+
+# Required programs
+req_prgs=(trizen sudo)
+for prog in ${req_prgs[@]}; do
+  if ! hash "$prog" 2>&-; then
+    echo >&2 ""${0##*/}": requires program: "$prog""
+    error=y; fi; done
+[ "$error" = y ] && exit 1
+
+# Parameter existence check
+param_tst () {
+  if [ -n "$@" ]; then
+    return 0
+  else
+    echo "no input specified"; exit 1; fi; }
+
+help_prnt () {
+  echo ""${0##*/}" [option] [*package] - a generic package tasks wrapper script
+  -e, --explicit - install a package as explicit
+  -g, --get      - get(download) packages             : -G get all pkg upgrades
+  -i, --install  - install a package                  : -I install as dependency
+  -l, --list     - list package files                 : -L list pkgs installed
+  -o, --owns     - owning package of a file
+  -q, --query    - query for an installed package     : -Q query w/ description
+  -r, --remove   - remove a pkg and its deps          : -R force, no param orphs
+  -s, --search   - search for a package               : -S search w/ description
+  -u, --upgrade  - upgrade system                     : -U upgrade AUR packages
+  -y, --sync     - sync package db"; }
+case $1 in
+  -e | --explicit )
+    shift; param_tst && sudo pacman -S --asexplicit "$@" ;;
+  -g | --get )
+    shift; param_tst && sudo pacman -Sw "$@" ;;
+  -G | --getup )
+    sudo pacman -Syuw ;;
+  -h | --help )
+    help_prnt ;;
+  -i | --install )
+    shift; param_tst
+    pre="[a-z,A-Z,0-9,@,/,\.\_\+\-]*pkg.tar[.]\?\(gz\|xz\|bz2\|lrz\|lzo\|Z\)\?"
+    pkgoff="$(echo "$@" | sed "s/$pre//g")"
+    pkgloc="$(echo "$@" | grep -o "$pre")"
+      [ -n "$pkgoff" ] &&      trizen -S $pkgoff
+      [ -n "$pkgloc" ] && sudo pacman -U $pkgloc ;;
+  -I | --depinst )
+    shift; param_tst
+    pre="[a-z,A-Z,0-9,@,/,\.\_\+\-]*pkg.tar[.]\?\(gz\|xz\|bz2\|lrz\|lzo\|Z\)\?"
+    pkgoff="$(echo "$@" | sed "s/"$pre"//g")"
+    pkgloc="$(echo "$@" | grep -o "$pre")"
+      [ -n "$pkgoff" ] && sudo pacman -S --asdeps $pkgoff
+      [ -n "$pkgloc" ] && sudo pacman -U --asdeps $pkgloc ;;
+  -l | --list )
+    shift; param_tst && pacman -Qql "$@" ;;
+  -L | --pkglist )
+    date="$(date "+%F")"
+    pacman -Qqe | grep -v "$(pacman -Qqm)" > pkglist-off_${date}.txt
+    pacman -Qqm                            > pkglist-loc_${date}.txt
+    [ $? = 0 ] && \
+    echo "Pkg lists built: pkglist-off_${date}.txt pkglist-loc_${date}.txt" ;;
+  -o | --own )
+    shift; param_tst && pacman -Qo  "$@" ;;
+  -q | --query )
+    shift; param_tst
+    for p in $@; do
+      pacman -Qqs "$p";done ;;
+  -Q | --Query )
+    shift; param_tst
+    for p in $@; do
+      pacman -Qi  "$p";done ;;
+  -r | --remove )
+    shift
+    if [[ -z "$@" ]]; then
+      sudo pacman -Rcs $(pacman -Qtdq)
+    else
+      sudo pacman -Rs "$@"; fi ;;
+  -R | --forcerm )
+    shift; param_tst && sudo pacman -Rdd "$@" ;;
+  -s | --search )
+    shift; param_tst
+    trizen -Ss "$@" | sed '/^    .*$/d' | cut -d " " -f 1 ;;
+  -S | --Search )
+    shift; param_tst
+    trizen -Si "$@"   ;;
+  -u | --upgrade )
+    sudo pacman -Syu ;;
+  -U | --upaur )
+    trizen -Syu --aur --devel ;;
+  -y | --sync )
+    sudo pacman -Syy ;;
+  * ) help_prnt       ;;
+esac
