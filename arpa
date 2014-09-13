@@ -11,14 +11,15 @@ param_tst () {
 help_prnt () {
   echo ""${0##*/}" [option] [*package] - a generic package tasks wrapper script
   -e, --explicit - install a package as explicit
-  -g, --get      - get/download package upgrade(s)    : -G get pkg upgrades all
-  -i, --install  - install a package                  : -I install as dependency
-  -l, --list     - list package files                 : -L list pkgs installed
+  -g, --get      - get/download package upgrade(s) : -G get pkg upgrades all
+  -i, --install  - install a package               : -I install as dependency
+  -l, --list     - list package files              : -L list pkgs installed
   -o, --owns     - owning package of a file
-  -q, --query    - query for an installed package     : -Q query w/ description
-  -r, --remove   - remove a pkg and its deps          : -R force, no argue orphs
-  -s, --search   - search for a package               : -S search w/ description
-  -u, --upgrade  - upgrade system                     : -U upgrade AUR
+  -n, --nfo      - information for a package
+  -q, --query    - query for an installed package  : -Q query w/ description
+  -r, --remove   - remove a pkg and its deps       : -R force, no argue orphs
+  -s, --search   - search for a package            : -S search w/ description
+  -u, --upgrade  - upgrade system                  : -U upgrade AUR
   -y, --sync     - sync package db"; }
 case $1 in
   -e | --explicit )
@@ -53,6 +54,9 @@ case $1 in
     echo "Pkg lists built: pkglist-off_${date}.txt pkglist-loc_${date}.txt" ;;
   -o | --own )
     shift; param_tst && pacman -Qo  "$@" ;;
+  -n | --nfo )
+    shift; param_tst
+    trizen -Si "$@"   ;;
   -q | --query )
     shift; param_tst
     for p in $@; do
@@ -74,7 +78,7 @@ case $1 in
     trizen -Ss "$@" | sed '/^    .*$/d' | cut -d " " -f 1 ;;
   -S | --Search )
     shift; param_tst
-    trizen -Si "$@"   ;;
+    trizen -Ss "$@"  ;;
   -u | --upgrade )
     sudo pacman -Syu ;;
   -U | --upaur )
