@@ -15,19 +15,24 @@ help_prnt () {
   -i, --install  - install a package               : -I install as dependency
   -l, --list     - list package files              : -L list pkgs installed
   -o, --owns     - owning package of a file
-  -n, --nfo      - information for a package
+  -n, --info     - information for a package
   -q, --query    - query for an installed package  : -Q query w/ description
   -r, --remove   - remove a pkg and its deps       : -R force, no argue orphs
   -s, --search   - search for a package            : -S search w/ description
   -u, --upgrade  - upgrade system                  : -U upgrade AUR
   -y, --sync     - sync package db"; }
+
+# Non-root user define sudo
+if (( $EUID )); then
+  sudo=sudo; fi
+
 case $1 in
   -e | --explicit )
-    shift; param_tst && sudo pacman -S --asexplicit "$@" ;;
+    shift; param_tst && $sudo pacman -S --asexplicit "$@" ;;
   -g | --get )
-    shift; param_tst && sudo pacman -Sw "$@" ;;
+    shift; param_tst && $sudo pacman -Sw "$@" ;;
   -G | --getup )
-    sudo pacman -Syuw ;;
+    $sudo pacman -Syuw ;;
   -h | --help )
     help_prnt ;;
   -i | --install )
@@ -36,14 +41,14 @@ case $1 in
     pkgoff="$(echo "$@" | sed "s/$pre//g")"
     pkgloc="$(echo "$@" | grep -o "$pre")"
       [ -n "$pkgoff" ] &&      trizen -S $pkgoff
-      [ -n "$pkgloc" ] && sudo pacman -U $pkgloc ;;
+      [ -n "$pkgloc" ] && $sudo pacman -U $pkgloc ;;
   -I | --depinst )
     shift; param_tst
     pre="[a-z,A-Z,0-9,@,/,\.\_\+\-]*pkg.tar[.]\?\(gz\|xz\|bz2\|lrz\|lzo\|Z\)\?"
     pkgoff="$(echo "$@" | sed "s/"$pre"//g")"
     pkgloc="$(echo "$@" | grep -o "$pre")"
-      [ -n "$pkgoff" ] && sudo pacman -S --asdeps $pkgoff
-      [ -n "$pkgloc" ] && sudo pacman -U --asdeps $pkgloc ;;
+      [ -n "$pkgoff" ] && $sudo pacman -S --asdeps $pkgoff
+      [ -n "$pkgloc" ] && $sudo pacman -U --asdeps $pkgloc ;;
   -l | --list )
     shift; param_tst && pacman -Qql "$@" ;;
   -L | --pkglist )
@@ -54,7 +59,7 @@ case $1 in
     echo "Pkg lists built: pkglist-off_${date}.txt pkglist-loc_${date}.txt" ;;
   -o | --own )
     shift; param_tst && pacman -Qo  "$@" ;;
-  -n | --nfo )
+  -n | --info )
     shift; param_tst
     trizen -Si "$@"   ;;
   -q | --query )
@@ -68,11 +73,11 @@ case $1 in
   -r | --remove )
     shift
     if [[ -z "$@" ]]; then
-      sudo pacman -Rcs $(pacman -Qtdq)
+      $sudo pacman -Rcs $(pacman -Qtdq)
     else
-      sudo pacman -Rs "$@"; fi ;;
+      $sudo pacman -Rs "$@"; fi ;;
   -R | --forcerm )
-    shift; param_tst && sudo pacman -Rdd "$@" ;;
+    shift; param_tst && $sudo pacman -Rdd "$@" ;;
   -s | --search )
     shift; param_tst
     trizen -Ss "$@" | sed '/^    .*$/d' | cut -d " " -f 1 ;;
@@ -80,10 +85,10 @@ case $1 in
     shift; param_tst
     trizen -Ss "$@"  ;;
   -u | --upgrade )
-    sudo pacman -Syu ;;
+    $sudo pacman -Syu ;;
   -U | --upaur )
     trizen -Syu --aur --devel ;;
   -y | --sync )
-    sudo pacman -Syy ;;
+    $sudo pacman -Syy ;;
   * ) help_prnt       ;;
 esac
