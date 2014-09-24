@@ -19,54 +19,47 @@ help_prnt () {
 if (( $EUID )); then
   sudo=sudo; fi
 
-# Parameter existence check
-param_tst () {
-  if [ "$#" -gt 0 ]; then
-    return 0
-  else
-    echo "No input specified."; exit 1; fi; }
-
 case $1 in
   -e | --explicit )
-    shift; param_tst && $sudo pacman -S --asexplicit "$@" ;;
+    shift; [ "$@" ] || exit 1; $sudo pacman -S --asexplicit "$@" ;;
   -g | --get )
-    shift; param_tst && $sudo pacman -Sw "$@" ;;
+    shift; [ "$@" ] || exit 1; $sudo pacman -Sw "$@" ;;
   -G | --getup )
     $sudo pacman -Syuw ;;
   -h | --help )
     help_prnt ;;
   -i | --install )
-    shift; param_tst
+    shift; [ "$@" ] || exit 1
     pre="[a-z,A-Z,0-9,@,/,\.\_\+\-]*pkg.tar[.]\?\(gz\|xz\|bz2\|lrz\|lzo\|Z\)\?"
     pkgoff=$(echo "$@" | sed "s/$pre//g")
     pkgloc=$(echo "$@" | grep -o "$pre")
       [ -n "$pkgoff" ] &&       trizen -S $pkgoff
       [ -n "$pkgloc" ] && $sudo pacman -U $pkgloc ;;
   -I | --depinst )
-    shift; param_tst
+    shift; [ "$@" ] || exit 1
     pre="[a-z,A-Z,0-9,@,/,\.\_\+\-]*pkg.tar[.]?\(gz\|xz\|bz2\|lrz\|lzo\|Z\)?"
     pkgoff=$(echo "$@" | sed "s/$pre//g")
     pkgloc=$(echo "$@" | grep -o "$pre")
       [ -n "$pkgoff" ] && $sudo pacman -S --asdeps $pkgoff
       [ -n "$pkgloc" ] && $sudo pacman -U --asdeps $pkgloc ;;
   -l | --list )
-    shift; param_tst && pacman -Qql "$@" ;;
+    shift; [ "$@" ] || exit 1; pacman -Qql "$@" ;;
   -L | --pkglist )
     date=$(date +%F)
     pacman -Qqe | grep -v "$(pacman -Qqm)" > pkglist-off_${date}.txt
     pacman -Qqm                            > pkglist-loc_${date}.txt
     echo "pkglists-built: pkglist-off_${date}.txt, pkglist-loc_${date}.txt" ;;
   -o | --own )
-    shift; param_tst && pacman -Qo  "$@" ;;
+    shift; [ "$@" ] || exit 1; pacman -Qo  "$@" ;;
   -n | --info )
-    shift; param_tst
+    shift; [ "$@" ] || exit 1
     trizen -Si "$@"   ;;
   -q | --query )
-    shift; param_tst
+    shift; [ "$@" ] || exit 1
     for p in $@; do
       pacman -Qqs "$p";done ;;
   -Q | --Query )
-    shift; param_tst
+    shift; [ "$@" ] || exit 1
     for p in $@; do
       pacman -Qi  "$p";done ;;
   -r | --remove )
@@ -77,12 +70,12 @@ case $1 in
     else
       $sudo pacman -Rs "$@"; fi ;;
   -R | --forcerm )
-    shift; param_tst && $sudo pacman -Rdd "$@" ;;
+    shift; [ "$@" ] || exit 1; $sudo pacman -Rdd "$@" ;;
   -s | --search )
-    shift; param_tst
+    shift; [ "$@" ] || exit 1
     trizen -Ssq "$@" ;;
   -S | --Search )
-    shift; param_tst
+    shift; [ "$@" ] || exit 1
     trizen -Ss "$@"  ;;
   -u | --upgrade )
     $sudo pacman -Syu ;;
