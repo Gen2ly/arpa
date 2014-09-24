@@ -13,7 +13,7 @@ help_prnt () {
   -r, --remove   - remove a pkg and its deps       : -R force, no argue orphs
   -s, --search   - search for a package            : -S search w/ description
   -u, --upgrade  - upgrade system                  : -U upgrade AUR
-  -y, --sync     - sync package db"; }
+  -y, --sync     - sync package db"; exit 1; }
 
 # Non-root user define sudo
 if (( $EUID )); then
@@ -21,45 +21,45 @@ if (( $EUID )); then
 
 case $1 in
   -e | --explicit )
-    shift; [ "$@" ] || exit 1; $sudo pacman -S --asexplicit "$@" ;;
+    shift; [ "$@" ] || help_prnt; $sudo pacman -S --asexplicit "$@" ;;
   -g | --get )
-    shift; [ "$@" ] || exit 1; $sudo pacman -Sw "$@" ;;
+    shift; [ "$@" ] || help_prnt; $sudo pacman -Sw "$@" ;;
   -G | --getup )
     $sudo pacman -Syuw ;;
   -h | --help )
     help_prnt ;;
   -i | --install )
-    shift; [ "$@" ] || exit 1
+    shift; [ "$@" ] || help_prnt
     pre="[a-z,A-Z,0-9,@,/,\.\_\+\-]*pkg.tar[.]\?\(gz\|xz\|bz2\|lrz\|lzo\|Z\)\?"
     pkgoff=$(echo "$@" | sed "s/$pre//g")
     pkgloc=$(echo "$@" | grep -o "$pre")
       [ -n "$pkgoff" ] &&       trizen -S $pkgoff
       [ -n "$pkgloc" ] && $sudo pacman -U $pkgloc ;;
   -I | --depinst )
-    shift; [ "$@" ] || exit 1
+    shift; [ "$@" ] || help_prnt
     pre="[a-z,A-Z,0-9,@,/,\.\_\+\-]*pkg.tar[.]?\(gz\|xz\|bz2\|lrz\|lzo\|Z\)?"
     pkgoff=$(echo "$@" | sed "s/$pre//g")
     pkgloc=$(echo "$@" | grep -o "$pre")
       [ -n "$pkgoff" ] && $sudo pacman -S --asdeps $pkgoff
       [ -n "$pkgloc" ] && $sudo pacman -U --asdeps $pkgloc ;;
   -l | --list )
-    shift; [ "$@" ] || exit 1; pacman -Qql "$@" ;;
+    shift; [ "$@" ] || help_prnt; pacman -Qql "$@" ;;
   -L | --pkglist )
     date=$(date +%F)
     pacman -Qqe | grep -v "$(pacman -Qqm)" > pkglist-off_${date}.txt
     pacman -Qqm                            > pkglist-loc_${date}.txt
     echo "pkglists-built: pkglist-off_${date}.txt, pkglist-loc_${date}.txt" ;;
   -o | --own )
-    shift; [ "$@" ] || exit 1; pacman -Qo  "$@" ;;
+    shift; [ "$@" ] || help_prnt; pacman -Qo  "$@" ;;
   -n | --info )
-    shift; [ "$@" ] || exit 1
+    shift; [ "$@" ] || help_prnt
     trizen -Si "$@"   ;;
   -q | --query )
-    shift; [ "$@" ] || exit 1
+    shift; [ "$@" ] || help_prnt
     for p in $@; do
       pacman -Qqs "$p";done ;;
   -Q | --Query )
-    shift; [ "$@" ] || exit 1
+    shift; [ "$@" ] || help_prnt
     for p in $@; do
       pacman -Qi  "$p";done ;;
   -r | --remove )
@@ -70,12 +70,12 @@ case $1 in
     else
       $sudo pacman -Rs "$@"; fi ;;
   -R | --forcerm )
-    shift; [ "$@" ] || exit 1; $sudo pacman -Rdd "$@" ;;
+    shift; [ "$@" ] || help_prnt; $sudo pacman -Rdd "$@" ;;
   -s | --search )
-    shift; [ "$@" ] || exit 1
+    shift; [ "$@" ] || help_prnt
     trizen -Ssq "$@" ;;
   -S | --Search )
-    shift; [ "$@" ] || exit 1
+    shift; [ "$@" ] || help_prnt
     trizen -Ss "$@"  ;;
   -u | --upgrade )
     $sudo pacman -Syu ;;
