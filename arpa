@@ -1,12 +1,5 @@
 #!/bin/bash
-# (ar)ch (pa)ckages - a generic package tasks script for Arch Linux
-
-# Parameter existence check
-param_tst () {
-  if [ -n "$@" ]; then
-    return 0
-  else
-    echo "no input specified"; exit 1; fi; }
+# (ar)ch (pa)ckages - a generic package tasks wrapper script for Arch Linux
 
 help_prnt () {
   echo ""${0##*/}" [option] [*package] - a generic package tasks wrapper script
@@ -26,6 +19,13 @@ help_prnt () {
 if (( $EUID )); then
   sudo=sudo; fi
 
+# Parameter existence check
+param_tst () {
+  if [ "$#" -gt 0 ]; then
+    return 0
+  else
+    echo "No input specified."; exit 1; fi; }
+
 case $1 in
   -e | --explicit )
     shift; param_tst && $sudo pacman -S --asexplicit "$@" ;;
@@ -38,25 +38,24 @@ case $1 in
   -i | --install )
     shift; param_tst
     pre="[a-z,A-Z,0-9,@,/,\.\_\+\-]*pkg.tar[.]\?\(gz\|xz\|bz2\|lrz\|lzo\|Z\)\?"
-    pkgoff="$(echo "$@" | sed "s/$pre//g")"
-    pkgloc="$(echo "$@" | grep -o "$pre")"
-      [ -n "$pkgoff" ] &&      trizen -S $pkgoff
+    pkgoff=$(echo "$@" | sed "s/$pre//g")
+    pkgloc=$(echo "$@" | grep -o "$pre")
+      [ -n "$pkgoff" ] &&       trizen -S $pkgoff
       [ -n "$pkgloc" ] && $sudo pacman -U $pkgloc ;;
   -I | --depinst )
     shift; param_tst
-    pre="[a-z,A-Z,0-9,@,/,\.\_\+\-]*pkg.tar[.]\?\(gz\|xz\|bz2\|lrz\|lzo\|Z\)\?"
-    pkgoff="$(echo "$@" | sed "s/"$pre"//g")"
-    pkgloc="$(echo "$@" | grep -o "$pre")"
+    pre="[a-z,A-Z,0-9,@,/,\.\_\+\-]*pkg.tar[.]?\(gz\|xz\|bz2\|lrz\|lzo\|Z\)?"
+    pkgoff=$(echo "$@" | sed "s/$pre//g")
+    pkgloc=$(echo "$@" | grep -o "$pre")
       [ -n "$pkgoff" ] && $sudo pacman -S --asdeps $pkgoff
       [ -n "$pkgloc" ] && $sudo pacman -U --asdeps $pkgloc ;;
   -l | --list )
     shift; param_tst && pacman -Qql "$@" ;;
   -L | --pkglist )
-    date="$(date "+%F")"
+    date=$(date +%F)
     pacman -Qqe | grep -v "$(pacman -Qqm)" > pkglist-off_${date}.txt
     pacman -Qqm                            > pkglist-loc_${date}.txt
-    [ $? = 0 ] && \
-    echo "Pkg lists built: pkglist-off_${date}.txt pkglist-loc_${date}.txt" ;;
+    echo "pkglists-built: pkglist-off_${date}.txt, pkglist-loc_${date}.txt" ;;
   -o | --own )
     shift; param_tst && pacman -Qo  "$@" ;;
   -n | --info )
@@ -72,15 +71,16 @@ case $1 in
       pacman -Qi  "$p";done ;;
   -r | --remove )
     shift
-    if [[ -z "$@" ]]; then
-      $sudo pacman -Rcs $(pacman -Qtdq)
+    if [ "$#" -eq 0 ]; then
+      extrpkg=$(pacman -Qtdq)
+      [ "$extrpkg" ] && $sudo pacman -Rcs $extrpkg
     else
       $sudo pacman -Rs "$@"; fi ;;
   -R | --forcerm )
     shift; param_tst && $sudo pacman -Rdd "$@" ;;
   -s | --search )
     shift; param_tst
-    trizen -Ss "$@" | sed '/^    .*$/d' | cut -d " " -f 1 ;;
+    trizen -Ssq "$@" ;;
   -S | --Search )
     shift; param_tst
     trizen -Ss "$@"  ;;
