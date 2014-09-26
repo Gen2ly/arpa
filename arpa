@@ -21,45 +21,45 @@ if (( $EUID )); then
 
 case $1 in
   -e | --explicit )
-    shift; [ "$@" ] || help_prnt; $sudo pacman -S --asexplicit "$@" ;;
+    shift; [ $# -gt 0 ] || help_prnt; $sudo pacman -S --asexplicit "$@" ;;
   -g | --get )
-    shift; [ "$@" ] || help_prnt; $sudo pacman -Sw "$@" ;;
+    shift; [ $# -gt 0 ] || help_prnt; $sudo pacman -Sw "$@" ;;
   -G | --getup )
     $sudo pacman -Syuw ;;
   -h | --help )
     help_prnt ;;
   -i | --install )
-    shift; [ "$@" ] || help_prnt
+    shift; [ $# -gt 0 ] || help_prnt
     pre="[a-z,A-Z,0-9,@,/,\.\_\+\-]*pkg.tar[.]\?\(gz\|xz\|bz2\|lrz\|lzo\|Z\)\?"
     pkgoff=$(echo "$@" | sed "s/$pre//g")
     pkgloc=$(echo "$@" | grep -o "$pre")
       [ -n "$pkgoff" ] &&       trizen -S $pkgoff
       [ -n "$pkgloc" ] && $sudo pacman -U $pkgloc ;;
   -I | --depinst )
-    shift; [ "$@" ] || help_prnt
+    shift; [ $# -gt 0 ] || help_prnt
     pre="[a-z,A-Z,0-9,@,/,\.\_\+\-]*pkg.tar[.]?\(gz\|xz\|bz2\|lrz\|lzo\|Z\)?"
     pkgoff=$(echo "$@" | sed "s/$pre//g")
     pkgloc=$(echo "$@" | grep -o "$pre")
       [ -n "$pkgoff" ] && $sudo pacman -S --asdeps $pkgoff
       [ -n "$pkgloc" ] && $sudo pacman -U --asdeps $pkgloc ;;
   -l | --list )
-    shift; [ "$@" ] || help_prnt; pacman -Qql "$@" ;;
+    shift; [ $# -gt 0 ] || help_prnt; pacman -Qql "$@" ;;
   -L | --pkglist )
     date=$(date +%F)
     pacman -Qqe | grep -v "$(pacman -Qqm)" > pkglist-off_${date}.txt
     pacman -Qqm                            > pkglist-loc_${date}.txt
     echo "pkglists-built: pkglist-off_${date}.txt, pkglist-loc_${date}.txt" ;;
   -o | --own )
-    shift; [ "$@" ] || help_prnt; pacman -Qo  "$@" ;;
+    shift; [ $# -gt 0 ] || help_prnt; pacman -Qo  "$@" ;;
   -n | --info )
-    shift; [ "$@" ] || help_prnt
+    shift; [ $# -gt 0 ] || help_prnt
     trizen -Si "$@"   ;;
   -q | --query )
-    shift; [ "$@" ] || help_prnt
+    shift; [ $# -gt 0 ] || help_prnt
     for p in $@; do
       pacman -Qqs "$p";done ;;
   -Q | --Query )
-    shift; [ "$@" ] || help_prnt
+    shift; [ $# -gt 0 ] || help_prnt
     for p in $@; do
       pacman -Qi  "$p";done ;;
   -r | --remove )
@@ -70,12 +70,12 @@ case $1 in
     else
       $sudo pacman -Rs "$@"; fi ;;
   -R | --forcerm )
-    shift; [ "$@" ] || help_prnt; $sudo pacman -Rdd "$@" ;;
+    shift; [ $# -gt 0 ] || help_prnt; $sudo pacman -Rdd "$@" ;;
   -s | --search )
-    shift; [ "$@" ] || help_prnt
+    shift; [ $# -gt 0 ] || help_prnt
     trizen -Ssq "$@" ;;
   -S | --Search )
-    shift; [ "$@" ] || help_prnt
+    shift; [ $# -gt 0 ] || help_prnt
     trizen -Ss "$@"  ;;
   -u | --upgrade )
     $sudo pacman -Syu ;;
