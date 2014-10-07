@@ -1,8 +1,8 @@
 #!/bin/bash
-# (ar)ch (pa)ckages - a generic package tasks wrapper script for Arch Linux
+# (ar)ch (pa)ckages - a package tasks wrapper script for Arch Linux
 
 help_prnt () {
-  echo ""${0##*/}" [option] [*package] - a generic package tasks wrapper script
+  echo ""${0##*/}" [option] [*package] - a package tasks wrapper script
   -e, --explicit - install a package as explicit
   -g, --get      - get/download package upgrade(s) : -G get pkg upgrades all
   -i, --install  - install a package               : -I install as dependency
