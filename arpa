@@ -37,7 +37,7 @@ case $1 in
       [ -n "$pkgloc" ] && $sudo pacman -U $pkgloc ;;
   -I | --depinst )
     shift; [ $# -gt 0 ] || help_prnt
-    pre="[a-z,A-Z,0-9,@,/,\.\_\+\-]*pkg.tar[.]?\(gz\|xz\|bz2\|lrz\|lzo\|Z\)?"
+    pre="[a-z,A-Z,0-9,@,/,\.\_\+\-]*pkg.tar[.]\?\(gz\|xz\|bz2\|lrz\|lzo\|Z\)\?"
     pkgoff=$(echo "$@" | sed "s/$pre//g")
     pkgloc=$(echo "$@" | grep -o "$pre")
       [ -n "$pkgoff" ] && $sudo pacman -S --asdeps $pkgoff
