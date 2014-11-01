@@ -80,7 +80,8 @@ case $1 in
   -u | --upgrade )
     $sudo pacman -Syu ;;
   -U | --upaur )
-    trizen -Syu --aur --devel ;;
+    trizen -Su --aur
+    trizen -Su --aur --devel ;;
   -y | --sync )
     $sudo pacman -Syy ;;
   * ) help_prnt       ;;
